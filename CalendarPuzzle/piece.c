@@ -3,7 +3,7 @@
 #include "piece.h"
 
 /* Shows a piece in the console (for debug only)*/
-void printPiece(Piece piece) {
+void displayPiece(Piece piece) {
 	printf("<- Piece ->\n");
     for (int row = piece.height-1; row >= 0; row--) {
         for (int column = 0; column < piece.width; column++) {

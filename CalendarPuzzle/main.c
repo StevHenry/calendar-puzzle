@@ -15,10 +15,10 @@ int main(void) {
 	Piece *pieces = NULL;
 	initPieces(pieces);
 
-	bool placed = placePiece(&board, &pieces[0], 3, 3, 1);
+	//bool placed = placePiece(&board, &pieces[0], 3, 3, 1);
 	printPiece(pieces[0]);
 
-	printf("Is placed? %d", placed);
+	//printf("Is placed? %d", placed);
 
 	displayBoard(board);
 
