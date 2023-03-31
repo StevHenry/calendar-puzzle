@@ -4,41 +4,41 @@
 #include "solver.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
+# include<time.h>
 
 int main(void) {
+	//- Initialization
 	Board board;
 	Piece* pieces = calloc(10, sizeof(Piece));
 	
-	configureBoard(&board, SUNDAY, 4, OCTOBER);
+	configureBoard(&board, SATURDAY, 1, JANUARY);
 	initPieces(pieces);
-	//----
-
-	printBoard(board);
-	printPiece(pieces[0]);
-
-	//placePiece(&board, &pieces[9], 2, 5);
-	printf("Piece 9 placed? %d\n", placePiece(&board, &pieces[9], 1, 4));
-
-	printf("Piece 6 placed? %d\n", placePiece(&board, &pieces[6], 2, 3));
-	printf("Piece 8 placed? %d\n", placePiece(&board, &pieces[8], 4, 4));
-
-	printf("Piece 5 placed? %d\n", placePiece(&board, &pieces[5], 4, 7));
-	rotatePiece(&pieces[4]);
-	rotatePiece(&pieces[4]);
-	rotatePiece(&pieces[4]);
-	printPiece(pieces[4]);
-	printf("Piece 4 placed? %d\n", placePiece(&board, &pieces[4], 1, 1));
-	printf("Piece 7 placed? %d\n", placePiece(&board, &pieces[7], 6, 6));
-
+	printf("Board configured to the specified date is: \n");
 	printBoard(board);
 
-	//----
+	//- Solver
+	clock_t start, end;
 
+	start = clock();
+	int result = solve(&board, pieces);
+	end = clock();
+	
+	if (result) {
+		double execution_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+		printf("%d solutions were found in %.2f seconds\n", result, execution_time);
+		printBoard(board);
+	}
+	else {
+		printf("No solution found...\n");
+	}
+	
+	//- Memory freeing
 	free(board.rows);
-	for (char i=0; i<10; i++) {
-		free(pieces[i].pieceRows);
+
+	for (char pieceIndex = 0; pieceIndex < 10; pieceIndex++) {
+		free(pieces[pieceIndex].pieceRows);
 	}
 	free(pieces);
+
 	return 0;
 }

@@ -17,7 +17,7 @@ void freeRow(Board* board, char rowNumber, char mask) {
 void configureBoard(Board* board, Day day, int number, Month month) {
 	board->rows = calloc(8, sizeof(char));
 	setBordure(board);
-	//fillDateCells(board, day, number, month);
+	fillDateCells(board, day, number, month);
 }
 
 /* Shows the full board on console */
@@ -55,7 +55,7 @@ void fillDateCells(Board *board, Day day, int number, Month month) {
 		fillRow(board, 7, 0b10000000 >> day);
 	}
 	// Month
-	fillRow(board, (month - 1) / 6, 0b10000000 >> month % 6 - 1);
+	fillRow(board, (month - 1) / 6, 0b10000000 >> (month -1 ) % 6);
 	// Figure
-	fillRow(board, 2 + ((number - 1) / 7), 0b10000000 >> number % 7-1);
+	fillRow(board, 2 + ((number - 1) / 7), 0b10000000 >> (number -1 ) % 7);
 }

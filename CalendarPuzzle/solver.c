@@ -2,6 +2,8 @@
 #include "piece.h"
 #include "solver.h"
 #include <stdbool.h>
+#include <stdio.h>
+#include <windows.h>
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY(byte)  \
@@ -15,10 +17,10 @@
   ((byte) & 0x01 ? '1' : '0') 
 
 bool canPlacePiece(Board* board, Piece* piece, char xPos, char yPos) {
-    if (xPos + piece->width > BOARD_WIDTH || yPos - piece->height +1 < 0) {
+    /*if (xPos + piece->width > BOARD_WIDTH || yPos - piece->height + 1 < 0) {
         printf("Piece \n");
         return false;
-    }
+    }*/
 
     for (char row = 0; row < piece->height; row++) {
         /*
@@ -36,19 +38,44 @@ bool canPlacePiece(Board* board, Piece* piece, char xPos, char yPos) {
 }
 
 
-bool placePiece(Board* board, Piece* piece, char xPos, char yPos) {
-
-    // Check if the piece can be placed on the board
-    if (!canPlacePiece(board, piece, xPos, yPos)) {
-        return false;
-    }
-
-    // Assign the piece to the board
+/* Assign the piece to the board */
+void placePiece(Board* board, Piece* piece, char xPos, char yPos) {
     for (int row = 0; row < piece->height; row++) {
         fillRow(board, yPos - piece->height + 1 + row, piece->pieceRows[row] << (BOARD_WIDTH - xPos - piece->width + 1));
     }
+}
 
-    return true;
+/* Removes the piece from the board */
+void removePiece(Board* board, Piece* piece, char xPos, char yPos) {
+    for (int row = 0; row < piece->height; row++) {
+        freeRow(board, yPos - piece->height + 1 + row, piece->pieceRows[row] << (BOARD_WIDTH - xPos - piece->width + 1));
+    }
+}
+
+/* Tries to solve the board puzzle */
+int solve(Board* board, Piece* pieces) {
+    return solvePiece(board, pieces, 0);
+}
+
+int solvePiece(Board* board, Piece* pieces, int pieceIndex) {
+    int nbSolution = 0;
+    if (pieceIndex == 10) {
+        return 1;
+    }
+    // test all the rotations
+    for (char rotation = 0; rotation < (pieces[pieceIndex].symetric ? 2 : 4); rotation++) {
+        for (char xPos = 0; xPos <= BOARD_WIDTH - pieces[pieceIndex].width; xPos++) {
+            for (char yPos = pieces[pieceIndex].height - 1; yPos < BOARD_HEIGHT; yPos++) {
+                if (canPlacePiece(board, &pieces[pieceIndex], xPos, yPos)) {
+                    placePiece(board, &pieces[pieceIndex], xPos, yPos);
+                    nbSolution += solvePiece(board, pieces, pieceIndex + 1);
+                    removePiece(board, &pieces[pieceIndex], xPos, yPos);
+                }
+            }
+        }
+        rotatePiece(&pieces[pieceIndex]);
+    }
+    return nbSolution;
 }
 
 
