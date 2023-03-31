@@ -3,10 +3,10 @@
 #include "piece.h"
 
 /* Shows a piece in the console (for debug only)*/
-void displayPiece(Piece piece) {
+void printPiece(Piece piece) {
 	printf("<- Piece ->\n");
-    for (int row = piece.height-1; row >= 0; row--) {
-        for (int column = 0; column < piece.width; column++) {
+	for (char row = 0; row < piece.height; row++) {
+        for (char column = piece.width-1; column >= 0; column--) {
             printf("%d", (piece.pieceRows[row] >> column) & 1);
         }
         printf("\n");
@@ -14,23 +14,35 @@ void displayPiece(Piece piece) {
 	printf("<- Piece end ->\n");
 }
 
-void initPieces(Piece *pieces) {
-	pieces = calloc(10, sizeof(Piece));
-	if (pieces == NULL) {
-		// Handle allocation error
-		return NULL;
+void initPieces(Piece* pieces) {
+	pieces[0] = (Piece){ malloc(4 * sizeof(char)), 4, 2};
+	pieces[1] = (Piece){ malloc(4 * sizeof(char)), 3, 3};
+	pieces[2] = (Piece){ malloc(4 * sizeof(char)), 3, 3};
+	pieces[3] = (Piece){ malloc(4 * sizeof(char)), 3, 3};
+	pieces[4] = (Piece){ malloc(4 * sizeof(char)), 4, 2};
+	pieces[5] = (Piece){ malloc(4 * sizeof(char)), 2, 3};
+	pieces[6] = (Piece){ malloc(4 * sizeof(char)), 3, 2};
+	pieces[7] = (Piece){ malloc(4 * sizeof(char)), 3, 2};
+	pieces[8] = (Piece){ malloc(4 * sizeof(char)), 3, 2};
+	pieces[9] = (Piece){ malloc(4 * sizeof(char)), 1, 4};
+
+	for (char i = 0; i < 10; i++) {
+		if (pieces[i].pieceRows == NULL) {
+			perror("Error while trying to allocate memory for pieces!");
+			return;
+		}
 	}
 
-	pieces[0] = (Piece){ (char[]) { 0b1, 0b1, 0b1, 0b11 }, 4, 2 };
-	pieces[1] = (Piece){ (char[]) { 0b10, 0b10, 0b111 }, 3, 3 };
-	pieces[2] = (Piece){ (char[]) { 0b111, 0b100, 0b100 }, 3, 3 };
-	pieces[3] = (Piece){ (char[]) { 0b110, 0b010, 0b011 }, 3, 3 };
-	pieces[4] = (Piece){ (char[]) { 0b1, 0b1, 0b11, 0b10 }, 3, 2 };
-	pieces[5] = (Piece){ (char[]) { 0b101, 0b111 }, 2, 3 };
-	pieces[6] = (Piece){ (char[]) { 0b10, 0b11, 0b11 }, 3, 2 };
-	pieces[7] = (Piece){ (char[]) { 0b01, 0b01, 0b11 }, 3, 2 };
-	pieces[8] = (Piece){ (char[]) { 0b10, 0b11, 0b01 }, 3, 2 };
-	pieces[9] = (Piece){ (char[]) { 0b1111 }, 1, 4 };
+	memcpy(pieces[0].pieceRows, (char[]) { 0b01 , 0b01, 0b01, 0b11}, pieces[0].height);
+	memcpy(pieces[1].pieceRows, (char[]) { 0b010, 0b010, 0b111 }, pieces[1].height);
+	memcpy(pieces[2].pieceRows, (char[]) { 0b111, 0b100, 0b100 }, pieces[2].height);
+	memcpy(pieces[3].pieceRows, (char[]) { 0b110, 0b010, 0b011 }, pieces[3].height);
+	memcpy(pieces[4].pieceRows, (char[]) { 0b01, 0b01, 0b11, 0b10 }, pieces[4].height);
+	memcpy(pieces[5].pieceRows, (char[]) { 0b101, 0b111 }, pieces[5].height);
+	memcpy(pieces[6].pieceRows, (char[]) { 0b10, 0b11, 0b11 }, pieces[6].height);
+	memcpy(pieces[7].pieceRows, (char[]) { 0b01, 0b01, 0b11 }, pieces[7].height);
+	memcpy(pieces[8].pieceRows, (char[]) { 0b10, 0b11, 0b01 }, pieces[8].height);
+	memcpy(pieces[9].pieceRows, (char[]) { 0b1111 }, pieces[9].height);
 }
 
 

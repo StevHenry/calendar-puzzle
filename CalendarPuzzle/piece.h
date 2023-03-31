@@ -9,7 +9,7 @@ typedef struct {
 
 //--- Initialization
 
-void initPieces(Piece *pieces);
+void initPieces(Piece* pieces);
 
 // --- Util
 

@@ -17,7 +17,7 @@ void fillRow(Board* board, char rowNumber, char mask);
 
 void freeRow(Board* board, char rowNumber, char mask);
 
-void displayBoard(Board board);
+void printBoard(Board board);
 
 void setBordure(Board *board);
 
