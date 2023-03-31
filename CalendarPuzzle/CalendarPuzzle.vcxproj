@@ -129,12 +129,13 @@
   <ItemGroup>
     <ClCompile Include="board.c" />
     <ClCompile Include="main.c" />
-    <ClCompile Include="piece.c" />
+    <ClCompile Include="shape.c" />
     <ClCompile Include="solver.c" />
+    <ClCompile Include="util.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="board.h" />
-    <ClInclude Include="piece.h" />
+    <ClInclude Include="shape.h" />
     <ClInclude Include="solver.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>

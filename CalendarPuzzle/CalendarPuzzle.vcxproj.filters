@@ -21,10 +21,13 @@
     <ClCompile Include="main.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="piece.c">
+    <ClCompile Include="shape.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
     <ClCompile Include="solver.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="util.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +38,7 @@
     <ClInclude Include="board.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="piece.h">
+    <ClInclude Include="shape.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="solver.h">

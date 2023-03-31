@@ -1,127 +1,98 @@
 ﻿#include "board.h"
-#include "piece.h"
+#include "shape.h"
 #include "solver.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <windows.h>
 
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte)  \
-  ((byte) & 0x80 ? '1' : '0'), \
-  ((byte) & 0x40 ? '1' : '0'), \
-  ((byte) & 0x20 ? '1' : '0'), \
-  ((byte) & 0x10 ? '1' : '0'), \
-  ((byte) & 0x08 ? '1' : '0'), \
-  ((byte) & 0x04 ? '1' : '0'), \
-  ((byte) & 0x02 ? '1' : '0'), \
-  ((byte) & 0x01 ? '1' : '0') 
-
-bool canPlacePiece(Board* board, Piece* piece, char xPos, char yPos) {
-    /*if (xPos + piece->width > BOARD_WIDTH || yPos - piece->height + 1 < 0) {
-        printf("Piece \n");
-        return false;
-    }*/
-
+/* Returns whether a piece is placeable at the specified coordintates */
+bool isPiecePlaceable(Board* board, Piece* piece, char xPos, char yPos) {
     for (char row = 0; row < piece->height; row++) {
-        /*
-        printf("INVERTED ROW %d : " BYTE_TO_BINARY_PATTERN "\n", row + yPos - piece->height + 1, BYTE_TO_BINARY(~(board->rows[row + yPos - piece->height + 1])));
-        printf("INVERTED SHIFTED BY %d " BYTE_TO_BINARY_PATTERN "\n", 7 - xPos - piece->width + 1, BYTE_TO_BINARY(~(board->rows[row + yPos - piece->height + 1]) >> (7 - xPos - piece->width + 1)));
-        printf("PIECE ROW " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY(piece->pieceRows[row]));
-        printf("MASK " BYTE_TO_BINARY_PATTERN "\n", BYTE_TO_BINARY((~(board->rows[row + yPos - piece->height+1]) >> (7 - xPos - piece->width + 1)) & piece->pieceRows[row]));
-        printf("IS DIFFERENT %d\n", ((~(board->rows[row + yPos - piece->height + 1]) >> (7 - xPos - piece->width + 1)) & piece->pieceRows[row]) != piece->pieceRows[row]);*/
-
-        if (((~(board->rows[row + yPos - piece->height+1]) >> (7 - xPos - piece->width + 1)) & piece->pieceRows[row]) != piece->pieceRows[row]) {
+        if (((~(board->rows[row + yPos - piece->height+2]) >> (BOARD_WIDTH - xPos - piece->width + 1)) & piece->pieceRows[row]) != piece->pieceRows[row]) {
             return false;
         }
     }
     return true;
 }
 
+/*
+0,0|   |   | 
+---------------
+   |   |   |
+---------------
+   |   |   |8,9
 
-/* Assign the piece to the board */
-void placePiece(Board* board, Piece* piece, char xPos, char yPos) {
-    for (int row = 0; row < piece->height; row++) {
-        fillRow(board, yPos - piece->height + 1 + row, piece->pieceRows[row] << (BOARD_WIDTH - xPos - piece->width + 1));
+Returns whether the specified stoping pattern is detected in the specified board
+*/
+bool containsStopingPattern(Board board, StopingPattern stoppingPattern, char xPos, char yPos) {
+    for (char row = 0; row < stoppingPattern.height; row++) {
+        if ((((board.rows[row + yPos - stoppingPattern.height + 1]) >> (8 - xPos - stoppingPattern.width + 1)) & stoppingPattern.patternMask[row]) != stoppingPattern.patternRows[row]) {
+            return false;
+        }
     }
+    return true;
 }
 
-/* Removes the piece from the board */
-void removePiece(Board* board, Piece* piece, char xPos, char yPos) {
-    for (int row = 0; row < piece->height; row++) {
-        freeRow(board, yPos - piece->height + 1 + row, piece->pieceRows[row] << (BOARD_WIDTH - xPos - piece->width + 1));
+/* Returns whether any of the stopping patterns are detected in the specified board */
+bool isSolvable(Board* board, StopingPattern* stoppingPatterns) {
+    for (char i = 0; i < STOPPING_PATTERNS_COUNT; i++) {
+        for (char xPos = 0; xPos <= 9 - stoppingPatterns[i].width; xPos++) {
+            for (char yPos = stoppingPatterns[i].height - 1; yPos < 10; yPos++) {
+                if (containsStopingPattern(board[0], stoppingPatterns[i], xPos, yPos)) {
+                    return false;
+                }
+            }
+        }
     }
+    return true;
 }
 
 /* Tries to solve the board puzzle */
-int solve(Board* board, Piece* pieces) {
-    return solvePiece(board, pieces, 0);
+int solve(Board* board, Piece* pieces, StopingPattern* stoppingPatterns) {
+    return solvePiece(board, pieces, stoppingPatterns, 0);
 }
 
-int solvePiece(Board* board, Piece* pieces, int pieceIndex) {
+/* Tries to place a piece on the board at any position possible. Calls itself when a place is found to place the next piece */
+int solvePiece(Board* board, Piece* pieces, StopingPattern* stoppingPatterns, int pieceIndex) {
     int nbSolution = 0;
     if (pieceIndex == 10) {
         return 1;
     }
-    // test all the rotations
+    //For each rotation
     for (char rotation = 0; rotation < (pieces[pieceIndex].symetric ? 2 : 4); rotation++) {
+        //For each column
         for (char xPos = 0; xPos <= BOARD_WIDTH - pieces[pieceIndex].width; xPos++) {
+            //For each row
             for (char yPos = pieces[pieceIndex].height - 1; yPos < BOARD_HEIGHT; yPos++) {
-                if (canPlacePiece(board, &pieces[pieceIndex], xPos, yPos)) {
+                // Check if the piece is placeable
+                if (isPiecePlaceable(board, &pieces[pieceIndex], xPos, yPos)) {
                     placePiece(board, &pieces[pieceIndex], xPos, yPos);
-                    nbSolution += solvePiece(board, pieces, pieceIndex + 1);
+                    //Check if the new configuration is still solvable
+                    if (isSolvable(board, stoppingPatterns)) {
+                        nbSolution += solvePiece(board, pieces, stoppingPatterns, pieceIndex + 1);
+                    }
+                    //Removes the piece from the board to place it somewhere else (to count all the solutions)
                     removePiece(board, &pieces[pieceIndex], xPos, yPos);
                 }
             }
         }
+        //Rotates the piece in order to count all the solutions
         rotatePiece(&pieces[pieceIndex]);
     }
     return nbSolution;
 }
 
 
-/*int solve(Board board, Pieces* pieces, Day day, int number, Month month) {
-    int nbSolutions = 0;
-    
-    if (*pieces == {}) {
-        nbSolutions++;
-    } else {
-        // iterate over all the pieces
-        for (Piece* piece : *pieces) {
-            // try placing the piece on the board in all possible positions
-            for (int i = 0; i < board.width - piece.width; i++) {
-                for (int j = 0; j < BOARD_HEIGHT - piece.height; j++) {
-                    if (canPlacePiece(board, piece, i, j)) {
-                        // place the piece on the board
-                        placePiece(&board, &piece, i, j);
-                        
-                        // remove the piece from the pieces list
-                        Pieces* remainingPieces = new Pieces(*pieces);
-                        remainingPieces->remove(piece);
-                        
-                        // recursively call solve() with the new board and pieces list
-                        nbSolutions += solve(board, remainingPieces, day, number, month);
-                        
-                        // remove the piece from the board and place it back in the pieces list
-                        board.removePiece(piece, i, j);
-                        remainingPieces->add(piece);
-                        
-                        // free memory allocated for remainingPieces
-                        delete remainingPieces;
-                    }
-                }
-            }
-        }
+/* Assign the piece to the board */
+void placePiece(Board* board, Piece* piece, char xPos, char yPos) {
+    for (char row = 0; row < piece->height; row++) {
+        fillRow(board, yPos - piece->height + 1 + row, piece->pieceRows[row] << (BOARD_WIDTH - xPos - piece->width + 1));
     }
-    
-    return nbSolutions;
 }
 
-
-
-*/
-
-
-
-
-
-
+/* Removes the piece from the board */
+void removePiece(Board* board, Piece* piece, char xPos, char yPos) {
+    for (char row = 0; row < piece->height; row++) {
+        freeRow(board, yPos - piece->height + 1 + row, piece->pieceRows[row] << (BOARD_WIDTH - xPos - piece->width + 1));
+    }
+}

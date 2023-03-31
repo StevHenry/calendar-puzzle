@@ -19,4 +19,16 @@ typedef enum {
 	JULY = 7, AUGUST = 8, SEPTEMBER = 9, OCTOBER = 10, NOVEMBER = 11, DECEMBER = 12
 } Month;
 
+
+typedef struct {
+	char dayNumber;
+	Day day;
+	Month month;
+	int resultCount;
+	double computationTime;
+} ComputationResult;
+
+
+void writeResults(char* path, ComputationResult *results);
+
 #endif
